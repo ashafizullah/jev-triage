@@ -1,0 +1,114 @@
+# Configuration for jev-triage, read from the repository's default branch.
+# Copy this file to .github/jev-triage.yml to activate it. Every key is optional.
+#
+# The file is validated with zod; an invalid value logs a warning and that key
+# falls back to its default instead of breaking triage.
+
+# Master switch. When false the app ignores every event for this repository.
+enabled: true
+
+# Log the actions that would be taken without writing anything to GitHub.
+dryRun: false
+
+# Closing an issue is destructive, so it stays opt-in even for confident spam.
+allowAutoClose: false
+
+# Ask Jev which maintainer is the best reviewer for pull requests.
+suggestReviewers: false
+
+# Model name. Leave this commented out to use the deployment-wide JEV_MODEL, or
+# jev-latest if that is unset too. Set it here to override both for this repository.
+# `jev-latest` can shift behaviour between releases, so pin a concrete version if your
+# thresholds are sensitive.
+# model: jev-latest
+
+# What gets triaged automatically, and how eagerly.
+triage:
+  # Turn either kind off entirely if you only want half the feature.
+  issues: true
+  pullRequests: true
+  # Re-run triage on every commit pushed to a pull request. Off by default: triage is a
+  # decision made when the item arrives, and each push would spend another Jev call.
+  # The pull request is still triaged on open, on edit, on reopen and when it becomes
+  # ready for review.
+  onPullRequestPush: false
+  # Draft pull requests are skipped by default. Nothing is missed by doing so: drafts
+  # cannot be merged, and `ready_for_review` fires when they are finished.
+  includeDrafts: false
+
+labels:
+  # One label per category Jev can return. These names match the labels GitHub creates
+  # by default, so most repositories already have them; rename them to fit yours.
+  category:
+    bug: bug
+    feature_request: enhancement
+    question: question
+    documentation: documentation
+    spam: spam
+    other: triage
+  needsInfo: needs-info
+  possibleDuplicate: possible-duplicate
+  needsTriage: needs-triage
+  priorityCritical: "priority:critical"
+
+thresholds:
+  # Below this Choice confidence we do not act on the category at all.
+  actMin: 0.6
+  # Confidence required before auto-closing a spam report.
+  autoCloseSpam: 0.9
+  # Duplicate score needed to attach a label, and to also leave a comment.
+  duplicateLabel: 0.75
+  duplicateComment: 0.85
+  # Composite spam risk band; inside the band the item is routed to a human.
+  spamRisk:
+    low: 0.4
+    high: 0.6
+  # Noul probability above which we assume a human is needed.
+  needsHumanReview: 0.5
+
+# Weights for the composite spam score, combined in code (not by the model).
+spamWeights:
+  promotional: 0.45
+  offTopic: 0.3
+  abusive: 0.25
+
+# Guards that keep each Jev request inside the 32k/64k token budgets.
+budget:
+  maxTotalEstimatedTokens: 24000
+  bodyChars: 8000
+  candidateTitleChars: 200
+  candidateExcerptChars: 400
+
+duplicates:
+  # How many items to consider as comparison candidates.
+  candidatePoolSize: 50
+  # How many reach the Jev verification call (one Noul question each).
+  maxCandidates: 6
+  # "open" compares against open items only; "all" includes closed ones.
+  candidateState: open
+  # Cap on suggested extra labels; too many Choice options hurts accuracy.
+  labelShortlistSize: 15
+
+notify:
+  # Which findings should send a message.
+  on:
+    - critical
+    - spam
+  # Environment variables holding the webhook URLs.
+  slackEnv: SLACK_WEBHOOK_URL
+  discordEnv: DISCORD_WEBHOOK_URL
+  # Telegram needs the bot token and the destination chat; both must be set.
+  telegramTokenEnv: TELEGRAM_BOT_TOKEN
+  telegramChatIdEnv: TELEGRAM_CHAT_ID
+  # Optional Bot API root, for a self-hosted Bot API server.
+  telegramApiBaseEnv: TELEGRAM_API_BASE
+
+ignore:
+  # Logins that should never be triaged.
+  authors: []
+  # Items carrying any of these labels are skipped entirely.
+  labels:
+    - skip-triage
+
+# Optional fixed reviewer pool. When empty, recent contributors are discovered.
+reviewerPool: []

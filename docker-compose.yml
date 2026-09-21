@@ -1,0 +1,20 @@
+services:
+  jev-triage:
+    build: .
+    image: jev-triage:local
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOST: 0.0.0.0
+      JEV_TRIAGE_DB_PATH: /app/data/jev-triage.db
+    volumes:
+      # SQLite database plus its WAL files live here.
+      - jev-triage-data:/app/data
+
+volumes:
+  jev-triage-data:

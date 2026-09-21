@@ -1,0 +1,35 @@
+# GitHub App manifest for jev-triage.
+#
+# Probot's setup wizard reads this file and uses it as the base for the app it
+# registers — and it spreads this file LAST, so any key here overrides the value
+# Probot generated. That is why `hook_attributes` and `redirect_url` are deliberately
+# absent: Probot derives them from the running server (`baseUrl`) and the smee channel,
+# which is what makes `npm run dev` -> http://localhost:3000 -> "Register a GitHub App"
+# work. Adding them back with a placeholder URL sends the OAuth callback and every
+# webhook to a host that does not exist.
+#
+# Deploying somewhere real? Either set the webhook URL on the app's settings page, or
+# copy this file and add:
+#
+#   hook_attributes:
+#     url: https://your-host.example/api/github/webhooks
+#     active: true
+#   redirect_url: https://your-host.example/probot/setup
+#
+name: jev-triage
+description: Automated issue & PR triage powered by Jev (TypeSafe AI).
+# Required by the manifest schema. Only the app's homepage link; it does not affect the
+# webhook or the OAuth callback. Change it if you fork this project.
+url: https://github.com/ashafizullah/jev-triage
+public: true
+default_permissions:
+  issues: write
+  pull_requests: write
+  contents: read
+  metadata: read
+  # Optional: only needed when suggestReviewers is enabled and the repo is owned by an org.
+  members: read
+default_events:
+  - issues
+  - issue_comment
+  - pull_request
